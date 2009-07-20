@@ -19,20 +19,22 @@ def shanks_tonelli(n, p):
 
 	while True:
 		i = find_lowest_i(r, n, p)
-		assert i <= s - 1
+		print "r=",r," i=",i," w=",w
 		assert 0 <= i
-		assert pow(pow(r, 2) / n, 2 * i, p) == 1
+		assert i <= s - 1
+		assert pow(pow(pow(r, 2) / n, 2), i, p) == 1
 		if i == 0:
 			return r
 		r = (r * pow(v, pow(2, s - i -1), p)) % p
 
 def find_lowest_i(r, n, p):
-	i = pow(r, 2) / n
+	start = (pow(r, 2) / n) % p
+	i = 0
 	while True:
-		result = pow(i, 2, p)
-		if result == 1:
+		if start == 1:
 			return i
-		i = result
+		start = pow(start, 2, p)
+		i += 1
 	
 def legendre_symbol(a, p):
 	ls = pow(a, (p-1)/2, p)
@@ -42,6 +44,9 @@ def legendre_symbol(a, p):
 		return ls
 
 if __name__ == "__main__":
-	assert 3 == shanks_tonelli(1, 8) # 3^2 = 9 = 1 mod 8
 	assert 4 == shanks_tonelli(2, 7)
+	print "."
 	assert 5 == shanks_tonelli(4, 6)
+	print "."
+	assert 3 == shanks_tonelli(1, 8) # 3^2 = 9 = 1 mod 8
+	print "."
