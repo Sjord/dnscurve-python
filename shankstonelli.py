@@ -26,6 +26,8 @@ def shanks_tonelli(n, p):
 		assert i <= s - 1
 		assert pow(pow(pow(r, 2) / n, 2), i, p) == 1
 		if i == 0:
+			assert pow(r, 2, p) == n
+			assert pow(p - r, 2, p) == n
 			return (r, p - r)
 		r = (r * pow(v, pow(2, s - i -1), p)) % p
 
