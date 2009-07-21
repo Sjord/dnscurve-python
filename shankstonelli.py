@@ -22,7 +22,7 @@ def shanks_tonelli(n, p):
 	print "r=",r," v=",v," w=",w
 
 	while True:
-		i = find_lowest_i(r, n, p)
+		i = find_lowest_i(n, q, p)
 		assert 0 <= i
 		assert i <= s - 1
 		assert pow(pow(pow(r, 2) / n, 2), i, p) == 1
@@ -30,8 +30,8 @@ def shanks_tonelli(n, p):
 			return r
 		r = (r * pow(v, pow(2, s - i -1), p)) % p
 
-def find_lowest_i(r, n, p):
-	start = (pow(r, 2) / n) % p
+def find_lowest_i(n, q, p):
+	start = pow(n, q, p)
 	i = 0
 	while True:
 		if start == 1:
