@@ -19,21 +19,24 @@ def shanks_tonelli(n, p):
 
 	r = pow(n, (q + 1) / 2, p)
 	v = pow(w, q, p)
+	r2n = pow(n, q, p) # contains R^2n^-1, which is n^Q at this point 
 
 	while True:
-		i = find_lowest_i(n, q, p)
+		i = find_lowest_i(r2n, p)
 		assert 0 <= i
 		assert i <= s - 1
-		assert pow(pow(pow(r, 2) / n, 2), i, p) == 1
+		assert pow(r2n, 2 ** i, p) == 1 
 		if i == 0:
 			assert pow(r, 2, p) == n
 			assert pow(p - r, 2, p) == n
 			return (r, p - r)
-		r = (r * pow(v, pow(2, s - i -1), p)) % p
+		factor = pow(v, pow(2, s - i - 1))
+		r = (r * factor) % p
+		r2n = (r2n * factor * factor) % p
 
-def find_lowest_i(n, q, p):
+def find_lowest_i(r2n, p):
 	# Wikipedia says to start with R^2n^-1, but this is the same as n^Q
-	start = pow(n, q, p)
+	start = r2n % p
 	i = 0
 	while True:
 		if start == 1:
