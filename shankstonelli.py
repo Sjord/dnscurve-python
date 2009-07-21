@@ -3,6 +3,9 @@ def shanks_tonelli(n, p):
 	""" x^2 = n (mod p)
 	returns x
 	"""
+
+	assert p % 2 != 0 and p % 3 != 0 # p is prime
+
 	s = 0
 	q = p - 1
 	while q % 2 == 0:
@@ -16,10 +19,10 @@ def shanks_tonelli(n, p):
 
 	r = pow(n, (q + 1) / 2, p)
 	v = pow(w, q, p)
+	print "r=",r," v=",v," w=",w
 
 	while True:
 		i = find_lowest_i(r, n, p)
-		print "r=",r," i=",i," w=",w
 		assert 0 <= i
 		assert i <= s - 1
 		assert pow(pow(pow(r, 2) / n, 2), i, p) == 1
@@ -46,7 +49,7 @@ def legendre_symbol(a, p):
 if __name__ == "__main__":
 	assert 4 == shanks_tonelli(2, 7)
 	print "."
-	assert 5 == shanks_tonelli(4, 6)
+	assert 5 == shanks_tonelli(3, 11)
 	print "."
-	assert 3 == shanks_tonelli(1, 8) # 3^2 = 9 = 1 mod 8
+	assert 3 == shanks_tonelli(9, 19)
 	print "."
