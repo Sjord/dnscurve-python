@@ -1,20 +1,5 @@
 from shanks_tonelli import shanks_tonelli
 
-def add(p, q):
-	(xp, yp) = p
-	(xq, yq) = q
-	s = (yp - yq) / (xp - xq)
-	xr = pow(s, 2) - xp - xq
-	yr = s * (xp - xr) - yp
-	return (xr, yr)
-
-def double(p, a):
-	(xp, yp) = p
-	s = (3 * pow(xp, 2) + a) / (2 * yp)
-	xr = pow(s, 2) - 2 * xp
-	yr = s * (xp - xr) - yp
-	return (xr, yr)
-
 class curve:
 	def __init__(self, a, p):
 		"""y ** 2 = x ** 3 + a * x ** 2 + x mod p"""
@@ -30,9 +15,26 @@ class curve:
 		ys = self.ys(x)
 		assert len(ys) == 2
 		return ((x, ys[0]), (x, ys[1]))
-		
+	def double(self, p):
+		(xp, yp) = p
+		s = (3 * pow(xp, 2) + self.a) / (2 * yp)
+		xr = (pow(s, 2, self.p) - 2 * xp) % self.p
+		yr = (s * (xp - xr) - yp) % self.p
+		return (xr, yr)
+	def add(self, p, q):
+		(xp, yp) = p
+		(xq, yq) = q
+		s = (yp - yq) / (xp - xq)
+		xr = (pow(s, 2, self.p) - xp - xq) % self.p
+		yr = (s * (xp - xr) - yp) % self.p
+		return (xr, yr)
 
 if __name__ == "__main__":
+	simple = curve(0, 23)
+	(p0, p1) = simple.points(1)
+	print p1
+	print simple.double(p1)
+else:
 	curve25519 = curve(486662, pow(2, 255) - 19)
 	points = curve25519.points(9)
 	p0 = points[0]
