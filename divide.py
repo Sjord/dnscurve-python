@@ -5,15 +5,15 @@ def divide(a, c, p):
 	return b == a/c mod p
 	"""
 	one = (p, 0) # p * b = 0
-	two = (a, c) # a * b = c
+	two = (c % p, a % p) # a * b = c
 	while two[0] != 0:
 		(quotient, remainder) = divmod(one[0], two[0])
 		newone = two
 		# Subtract two as often as possible from one
-		two = (remainder, one[1] - quotient * two[1] % p)
+		two = (remainder, (one[1] - quotient * two[1]) % p)
 		one = newone
 	b = one[1];
-	assert (a * b) % p == c % p
+	assert (b * c) % p == a % p
 	return b
 		
 
