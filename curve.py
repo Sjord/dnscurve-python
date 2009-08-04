@@ -43,27 +43,23 @@ class curve:
 		return r
 
 if __name__ == "__main__":
+	def testcurve(curve, (p0, p1)):
+		assert p1 == curve.add(0, p1)
+		assert p1 == curve.add(p1, 0)
+		assert curve.add(p1, p1) == curve.double(p1)
+		p1x2 = curve.double(p1)
+		p1x3 = curve.add(p1x2, p1)
+		p1x4 = curve.double(p1x2)
+		assert p1x4 == curve.add(p1x3, p1)
+		assert p1x4 == curve.multiply(p1, 4)
+		assert p1x4 == curve.add(curve.multiply(p1, 3), p1)
+		# X of both points stays the same under multiplication - Theorem 2.1
+		assert curve.double(p0)[0] == curve.double(p1)[0]
+
 	simple = curve(0, 23)
-	(p0, p1) = simple.points(1)
-	twice = simple.double(p1)
-	four0 = simple.double(twice)
-	three = simple.add(twice, p1)
-	four1 = simple.add(three, p1)
-	assert four0 == four1
-	assert p1 == simple.add(0, p1)
-	assert p1 == simple.add(p1, 0)
-	assert twice == simple.add(p1, p1)
-	assert twice == simple.multiply(p1, 2)
-	assert three == simple.multiply(p1, 3)
-	assert four0 == simple.multiply(p1, 4)
+	testcurve(simple, simple.points(1))
 
 	curve25519 = curve(486662, pow(2, 255) - 19)
-	points = curve25519.points(9)
-	p0 = points[0]
-	a = 486662
-	twice = curve25519.double(p0)
-	four0 = curve25519.double(twice)
-	three = curve25519.add(twice, p0)
-	four1 = curve25519.add(three, p0)
-	assert four0 == four1
+	testcurve(curve25519, curve25519.points(9))
+
 
