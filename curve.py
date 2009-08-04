@@ -23,12 +23,24 @@ class curve:
 		yr = (s * (xp - xr) - yp) % self.p
 		return (xr, yr)
 	def add(self, p, q):
+		if p == 0: return q
+		if q == 0: return p
+		if p == q: return self.double(p)
 		(xp, yp) = p
 		(xq, yq) = q
 		s = divide(yp - yq, xp - xq, self.p)
 		xr = (pow(s, 2, self.p) - xp - xq) % self.p
 		yr = (s * (xp - xr) - yp) % self.p
 		return (xr, yr)
+	def multiply(self, p, n):
+		q = p
+		r = 0
+		while n > 0:
+			if n & 1:
+				r = self.add(r, q)
+			q = self.double(q)
+			n /= 2
+		return r
 
 if __name__ == "__main__":
 	simple = curve(0, 23)
@@ -38,6 +50,12 @@ if __name__ == "__main__":
 	three = simple.add(twice, p1)
 	four1 = simple.add(three, p1)
 	assert four0 == four1
+	assert p1 == simple.add(0, p1)
+	assert p1 == simple.add(p1, 0)
+	assert twice == simple.add(p1, p1)
+	assert twice == simple.multiply(p1, 2)
+	assert three == simple.multiply(p1, 3)
+	assert four0 == simple.multiply(p1, 4)
 
 	curve25519 = curve(486662, pow(2, 255) - 19)
 	points = curve25519.points(9)
