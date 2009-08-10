@@ -31,6 +31,24 @@ class salsa20:
 		return shifted | wraparound 
 	def littleendian(self, *b):
 		return b[0] + 2 ** 8 * b[1] + 2 ** 16 * b[2] + 2 ** 24 * b[3]
+	def rlittleendian(self, word):
+		bytes = 4 * [0]
+		bytes[0] = word % 2 ** 8
+		bytes[1] = word / 2 ** 8 % 2 ** 8
+		bytes[2] = word / 2 ** 16 % 2 ** 8
+		bytes[3] = word / 2 ** 24 % 2 ** 8
+		return tuple(bytes)
+	def bytes2words(self, bytes):
+		wordcount = len(bytes) / 4
+		words = wordcount * [0]
+		for i in range(0, wordcount):
+			words[i] = self.littleendian(* bytes[i * 4:(i + 1) * 4])
+		return words
+	def words2bytes(self, words):
+		wordcount = len(words)
+		bytes = []
+		for i in range(0, wordcount):
+			bytes += self.rlittleendian(words[i])
 
 if __name__ == "__main__":
 	s20 = salsa20()
@@ -116,5 +134,9 @@ if __name__ == "__main__":
 	assert littleendian(0, 0, 0, 0) == 0x00000000
 	assert littleendian(86, 75, 30, 9) == 0x091e4b56
 	assert littleendian(255, 255, 255, 250) == 0xfaffffff
+	rlittleendian = s20.rlittleendian
+	assert rlittleendian(0x00000000) == (0, 0, 0, 0)
+	assert rlittleendian(0x091e4b56) == (86, 75, 30, 9)
+	assert rlittleendian(0xfaffffff) == (255, 255, 255, 250)
 
 
