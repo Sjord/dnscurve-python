@@ -29,6 +29,8 @@ class salsa20:
 		wraparound = number >> self.wordsize - bits
 		shifted = number << bits & 2 ** 32 - 1
 		return shifted | wraparound 
+	def littleendian(self, *b):
+		return b[0] + 2 ** 8 * b[1] + 2 ** 16 * b[2] + 2 ** 24 * b[3]
 
 if __name__ == "__main__":
 	s20 = salsa20()
@@ -109,4 +111,10 @@ if __name__ == "__main__":
 		0x50440492, 0xf07cad19, 0xae344aa0, 0xdf4cfdfc, \
 		0xca531c29, 0x8e7943db, 0xac1680cd, 0xd503ca00, \
 		0xa74b2ad6, 0xbc331c5c, 0x1dda24c7, 0xee928277)
+
+	littleendian = s20.littleendian
+	assert littleendian(0, 0, 0, 0) == 0x00000000
+	assert littleendian(86, 75, 30, 9) == 0x091e4b56
+	assert littleendian(255, 255, 255, 250) == 0xfaffffff
+
 
