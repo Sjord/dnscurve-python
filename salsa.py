@@ -1,3 +1,9 @@
+import sys
+
+def powerfunc(times, func, *x):
+	for i in range(0, times):
+		x = func(*x)
+	return x
 
 class salsa20:
 	wordsize = 32
@@ -27,7 +33,7 @@ class salsa20:
 		return rowround(*columnround(*x))
 	def left_rotate(self, number, bits):
 		wraparound = number >> self.wordsize - bits
-		shifted = number << bits & 2 ** 32 - 1
+		shifted = number << bits & 2 ** self.wordsize - 1
 		return shifted | wraparound 
 	def littleendian(self, *b):
 		return b[0] + 2 ** 8 * b[1] + 2 ** 16 * b[2] + 2 ** 24 * b[3]
@@ -51,11 +57,8 @@ class salsa20:
 			bytes += self.rlittleendian(words[i])
 		return bytes
 	def salsa20(self, *bytes):
-		# TODO clean this up with some pythonesque list things
 		z = self.bytes2words(bytes)
-		x = z
-		for i in range(0, 10):
-			x = self.doubleround(* x)
+		x = powerfunc(10, self.doubleround, *z)
 		salsawords = []
 		for i in range(0, len(z)):
 			salsawords += [z[i] + x[i]]
@@ -175,7 +178,17 @@ if __name__ == "__main__":
 		26,110,170,154,109, 42,178,168,156,240,248,238,168,196,190,203, \
 		69,144, 51, 57, 29, 29,150, 26,150, 30,235,249,190,163,251, 48, \
 		27,111,114,114,118, 40,152,157,180, 57, 27, 94,107, 42,236, 35)
-	# TODO add Salsa20 * 1000000
+	if False:
+		# This takes a long time (20 min), so don't do it
+		assert powerfunc(1000000, Salsa20, 6,124, 83,146, 38,191, 9, 50, 4,161, 47,222,122,182,223,185, \
+		75, 27, 0,216, 16,122, 7, 89,162,104,101,147,213, 21, 54, 95, \
+		225,253,139,176,105,132, 23,116, 76, 41,176,207,221, 34,157,108, \
+		94, 94, 99, 52, 90,117, 91,220,146,190,239,143,196,176,130,186) \
+		== (8, 18, 38,199,119, 76,215, 67,173,127,144,162,103,212,176,217, \
+		192, 19,233, 33,159,197,154,160,128,243,219, 65,171,136,135,225, \
+		123, 11, 68, 86,237, 82, 20,155,133,189, 9, 83,167,116,194, 78, \
+		122,127,195,185,185,204,188, 90,245, 9,183,248,226, 85,245,104)
+
 
 
 
