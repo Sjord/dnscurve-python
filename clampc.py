@@ -1,4 +1,3 @@
-import struct
 
 def clampc(str):
 	assert len(str) == 32
