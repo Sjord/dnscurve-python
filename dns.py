@@ -11,14 +11,14 @@ import socket
 
 class DnsHeader:
 	def __init__(self):
-		self.id = 0
+		self.id = 0x1234
 		self.bits = 0
 		self.qdCount = 0
 		self.anCount = 0
 		self.nsCount = 0
 		self.arCount = 0
 	def toBinary(self):
-		return pack('HHHHHH',
+		return pack('!HHHHHH',
 			self.id,
 			self.bits,
 			self.qdCount,
@@ -38,7 +38,7 @@ class DnsQuestion:
 			bin += pack('B', len(label))
 			bin += label
 		bin += '\0' # Labels terminator
-		bin += pack('HH', self.qtype, self.qclass)
+		bin += pack('!HH', self.qtype, self.qclass)
 		return bin
 
 class DnsPacket:
@@ -58,21 +58,21 @@ class DnsPacket:
 if __name__ == '__main__':
 	header = DnsHeader()
 	bin = header.toBinary()
-	print bin.encode('hex')
+	print 'header', bin.encode('hex')
 
 	question = DnsQuestion()
 	question.labels = ['hello', 'world']
-	print question.toBinary().encode('hex')
+	print 'question', question.toBinary().encode('hex')
 
 	packet = DnsPacket(header)
 	packet.addQuestion(question)
-	print packet.toBinary().encode('hex')
+	print 'packet', packet.toBinary().encode('hex')
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	sock.sendto(packet.toBinary(), ('8.8.4.4', 53))
 	result = sock.recvfrom(1024)
-	print result
+	print 'result', result
 
 
 	
