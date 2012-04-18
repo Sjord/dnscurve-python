@@ -1,5 +1,5 @@
-from struct import pack
 import socket
+import struct
 
 # OCTET 1,2 	ID 
 # OCTET 3,4	QR(1 bit) + OPCODE(4 bit)+ AA(1 bit) + TC(1 bit) + RD(1 bit)+ RA(1 bit) + 
@@ -12,19 +12,29 @@ import socket
 class DnsHeader:
 	def __init__(self):
 		self.id = 0x1234
-		self.bits = 0
+		self.bits = 0x0100 # recursion desired
 		self.qdCount = 0
 		self.anCount = 0
 		self.nsCount = 0
 		self.arCount = 0
 	def toBinary(self):
-		return pack('!HHHHHH',
+		return struct.pack('!HHHHHH',
 			self.id,
 			self.bits,
 			self.qdCount,
 			self.anCount,
 			self.nsCount,
 			self.arCount);
+	def fromBinary(self, bin):
+		(self.id,
+		 self.bits,
+		 self.qdCount,
+		 self.anCount,
+		 self.nsCount,
+		 self.arCount) = struct.unpack('!HHHHHH', bin)
+		return self
+	def __repr__(self):
+		return '<DnsHeader %d, %d questions, %d answers>' % (self.id, self.qdCount, self.anCount)
 
 class DnsQuestion:
 	def __init__(self):
@@ -35,14 +45,14 @@ class DnsQuestion:
 		bin = '';
 		for label in self.labels:
 			assert len(label) <= 63
-			bin += pack('B', len(label))
+			bin += struct.pack('B', len(label))
 			bin += label
 		bin += '\0' # Labels terminator
-		bin += pack('!HH', self.qtype, self.qclass)
+		bin += struct.pack('!HH', self.qtype, self.qclass)
 		return bin
 
 class DnsPacket:
-	def __init__(self, header):
+	def __init__(self, header = None):
 		self.header = header
 		self.questions = []
 	def addQuestion(self, question):
@@ -53,6 +63,11 @@ class DnsPacket:
 		for question in self.questions:
 			bin += question.toBinary()
 		return bin
+	def fromBinary(self, bin):
+		self.header = DnsHeader().fromBinary(bin[:12])
+		return self 
+	def __repr__(self):
+		return '<DnsPacket %s>' % (self.header)
 
 
 if __name__ == '__main__':
@@ -61,7 +76,7 @@ if __name__ == '__main__':
 	print 'header', bin.encode('hex')
 
 	question = DnsQuestion()
-	question.labels = ['hello', 'world']
+	question.labels = ['google', 'com']
 	print 'question', question.toBinary().encode('hex')
 
 	packet = DnsPacket(header)
@@ -70,9 +85,14 @@ if __name__ == '__main__':
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	sock.sendto(packet.toBinary(), ('8.8.4.4', 53))
-	result = sock.recvfrom(1024)
-	print 'result', result
+	# dest = ('127.0.0.1', 5353)
+	dest = ('8.8.4.4', 53)
+	sock.sendto(packet.toBinary(), dest)
+	(response, address) = sock.recvfrom(1024)
+	print 'respon', response.encode('hex')
+
+	packet = DnsPacket().fromBinary(response)
+	print packet
 
 
 	
