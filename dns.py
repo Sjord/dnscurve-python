@@ -1,5 +1,6 @@
 import socket
 import struct
+import StringIO
 
 # OCTET 1,2 	ID 
 # OCTET 3,4	QR(1 bit) + OPCODE(4 bit)+ AA(1 bit) + TC(1 bit) + RD(1 bit)+ RA(1 bit) + 
@@ -26,6 +27,8 @@ class DnsHeader:
 			self.nsCount,
 			self.arCount);
 	def fromBinary(self, bin):
+		if bin.read:
+			bin = bin.read(12)
 		(self.id,
 		 self.bits,
 		 self.qdCount,
@@ -55,6 +58,7 @@ class DnsPacket:
 	def __init__(self, header = None):
 		self.header = header
 		self.questions = []
+		self.answers = []
 	def addQuestion(self, question):
 		self.header.qdCount += 1
 		self.questions.append(question)
@@ -63,11 +67,37 @@ class DnsPacket:
 		for question in self.questions:
 			bin += question.toBinary()
 		return bin
-	def fromBinary(self, bin):
-		self.header = DnsHeader().fromBinary(bin[:12])
-		return self 
 	def __repr__(self):
 		return '<DnsPacket %s>' % (self.header)
+
+class DnsPacketConverter:
+	def fromBinary(self, bin):
+		reader = StringIO.StringIO(bin)
+		header = DnsHeader().fromBinary(reader)
+		packet = DnsPacket(header)
+		for qi in range(header.qdCount):
+			q = self.readQuestion(reader)
+			packet.questions.append(q)
+		for ai in range(header.anCount):
+			a = self.readAnswer(reader)
+			packet.answers.append(a) 
+		return packet
+	def readQuestion(self, reader):
+		question = DnsQuestion()
+		question.labels = self.readLabels(reader)
+		(question.qtype, question.qclass) = struct.unpack('!HH', reader.read(4))
+		return question
+	def readAnswer(self, reader):
+		pass
+	def readLabels(self, reader):
+		labels = []
+		while True:
+			(length,) = struct.unpack('B', reader.read(1))
+			if length == 0: break
+			label = reader.read(length)
+			labels.append(label)
+		return labels
+	
 
 
 if __name__ == '__main__':
@@ -91,7 +121,8 @@ if __name__ == '__main__':
 	(response, address) = sock.recvfrom(1024)
 	print 'respon', response.encode('hex')
 
-	packet = DnsPacket().fromBinary(response)
+	conv = DnsPacketConverter()
+	packet = conv.fromBinary(response)
 	print packet
 
 
