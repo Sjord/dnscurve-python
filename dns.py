@@ -39,6 +39,12 @@ class DnsHeader:
 	def __repr__(self):
 		return '<DnsHeader %d, %d questions, %d answers>' % (self.id, self.qdCount, self.anCount)
 
+class DnsResourceRecord:
+	pass
+
+class DnsAnswer(DnsResourceRecord):
+	pass
+
 class DnsQuestion:
 	def __init__(self):
 		self.labels = []
@@ -70,9 +76,16 @@ class DnsPacket:
 	def __repr__(self):
 		return '<DnsPacket %s>' % (self.header)
 
+class BinReader(StringIO.StringIO):
+	def unpack(self, fmt):
+		size = struct.calcsize(fmt)
+		bin = self.read(size)
+		print bin.encode('hex')
+		return struct.unpack(fmt, bin)
+
 class DnsPacketConverter:
 	def fromBinary(self, bin):
-		reader = StringIO.StringIO(bin)
+		reader = BinReader(bin)
 		header = DnsHeader().fromBinary(reader)
 		packet = DnsPacket(header)
 		for qi in range(header.qdCount):
@@ -85,15 +98,21 @@ class DnsPacketConverter:
 	def readQuestion(self, reader):
 		question = DnsQuestion()
 		question.labels = self.readLabels(reader)
-		(question.qtype, question.qclass) = struct.unpack('!HH', reader.read(4))
+		(question.qtype, question.qclass) = reader.unpack('!HH')
 		return question
 	def readAnswer(self, reader):
-		pass
+		print "reading answer"
+		answer = DnsAnswer()
+		answer.name = self.readLabels(reader)
+		(type, rrclass, ttl, rdlength) = reader.unpack('!HHiH')
+		answer.rdata = reader.read(rdlength)
+		print answer.rdata
 	def readLabels(self, reader):
 		labels = []
 		while True:
-			(length,) = struct.unpack('B', reader.read(1))
+			(length,) = reader.unpack('B')
 			if length == 0: break
+			# TODO suppport compression
 			label = reader.read(length)
 			labels.append(label)
 		return labels
