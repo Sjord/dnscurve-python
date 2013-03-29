@@ -112,7 +112,18 @@ class DnsPacketConverter:
 		while True:
 			(length,) = reader.unpack('B')
 			if length == 0: break
-			# TODO suppport compression
+
+			# Compression
+			compressionMask = 0b11000000;
+			if length & compressionMask:
+				byte1 = length & ~compressionMask;
+				(byte2,) = reader.unpack('B')
+				offset = byte1 << 8 | byte2
+				oldPosition = reader.tell()
+				result = self.readLabels(reader)
+				reader.seek(oldPosition)
+				return result
+
 			label = reader.read(length)
 			labels.append(label)
 		return labels
