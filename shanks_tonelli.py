@@ -5,6 +5,7 @@ def shanks_tonelli(n, p):
 	"""
 
 	assert p % 2 != 0 and p % 3 != 0 # p is prime
+	assert legendre_symbol(n, p) == 1
 
 	s = 0
 	q = p - 1
@@ -55,3 +56,8 @@ if __name__ == "__main__":
 	assert 4 in shanks_tonelli(2, 7)
 	assert 5 in shanks_tonelli(3, 11)
 	assert 3 in shanks_tonelli(9, 19)
+
+	assert legendre_symbol(369, 123) == 0
+	assert legendre_symbol(4, 11) == 1
+	assert legendre_symbol(3, 7) == -1
+
