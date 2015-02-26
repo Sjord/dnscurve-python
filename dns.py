@@ -1,6 +1,8 @@
 import socket
 import struct
 import StringIO
+import re
+import convert
 
 # OCTET 1,2 	ID 
 # OCTET 3,4	QR(1 bit) + OPCODE(4 bit)+ AA(1 bit) + TC(1 bit) + RD(1 bit)+ RA(1 bit) + 
@@ -129,8 +131,20 @@ class DnsPacketConverter:
 		return labels
 	
 
+def get_key(host):
+    parts = host.split('.')
+    for part in parts:
+        if re.match('uz5[0123456789bcdfghjklmnpqrstuvwxyz]{51}', part):
+            return convert.base32().decode(part)
+    return None
+
 
 if __name__ == '__main__':
+    dest = 'uz5crn6x92t4vb4k3z68du7rmwmnnvkbdd29t79yzg9fr2s2rx5pk0.nsde1.eqmx.net'
+    print get_key(dest)
+
+if False:
+
 	header = DnsHeader()
 	bin = header.toBinary()
 	print 'header', bin.encode('hex')
