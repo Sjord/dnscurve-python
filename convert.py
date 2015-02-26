@@ -2,7 +2,11 @@ import struct
 
 class little_endian:
 	def to_string(self, number):
-		pass
+		res = ''
+		for _ in range(0, 32):
+			res += chr(number % 256)
+			number /= 256
+		return res
 	def from_string(self, string):
 		assert len(string) == 32
 		numbers = struct.unpack('<4Q', string)
@@ -48,6 +52,9 @@ if __name__ == "__main__":
 	le = little_endian()
 	assert 9 == le.from_string("\x09" + 31 * "\0");
 	assert 2 ** 255 == le.from_string(31 * "\0" + "\x80")
+
+	assert le.to_string(9) == "\x09" + 31 * "\0"
+	assert le.to_string(2 ** 255) == 31 * "\0" + "\x80"
 
 	b32 = base32()
 	# 4321 == 34916, from the dnscurve.org website
