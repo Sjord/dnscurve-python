@@ -1,9 +1,11 @@
+# coding: utf8
 from shanks_tonelli import shanks_tonelli
 from divide import divide
 
 class curve:
 	def __init__(self, a, p):
 		"""y ** 2 = x ** 3 + a * x ** 2 + x mod p"""
+		assert a ** 2 - 4 != 0
 		self.a = a
 		self.p = p
 	def ysquare(self, x):
@@ -41,6 +43,15 @@ class curve:
 			q = self.double(q)
 			n /= 2
 		return r
+	def is_on_curve(self, p):
+		xp, yp = p
+		y2_through_x = self.ysquare(xp)
+		y2_through_y = pow(yp, 2, self.p)
+		return y2_through_x == y2_through_y
+	def __str__(self):
+		return """y² = x³ + %dx² + x mod %d""" % (self.a, self.p)
+
+
 
 if __name__ == "__main__":
 	def testcurve(curve, (p0, p1)):
@@ -55,6 +66,12 @@ if __name__ == "__main__":
 		assert p1x4 == curve.add(curve.multiply(p1, 3), p1)
 		# X of both points stays the same under multiplication - Theorem 2.1
 		assert curve.double(p0)[0] == curve.double(p1)[0]
+
+		assert curve.is_on_curve(p0)
+		assert curve.is_on_curve(p1)
+		assert curve.is_on_curve(p1x2)
+		assert curve.is_on_curve(p1x3)
+		assert curve.is_on_curve(p1x4)
 
 	simple = curve(0, 23)
 	testcurve(simple, simple.points(1))
